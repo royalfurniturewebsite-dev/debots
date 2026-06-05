@@ -156,7 +156,7 @@
   /* ── Headline ── */
   h1 {
     font-family: 'Syne', sans-serif;
-    font-size: clamp(30px, 5.5vw, 42px);
+    font-size: 36px;
     font-weight: 800;
     line-height: 1.12;
     margin-bottom: 18px;
@@ -351,6 +351,7 @@
   </div>
   <p class="form-hint" id="formHint">Be the first to know when we launch.</p>
   <p class="success-msg" id="successMsg">✓ You're on the list — we'll reach out when we launch!</p>
+  <p class="error-msg" id="errorMsg" style="display:none;font-size:13px;color:#e24b4a;margin-bottom:16px;">Something went wrong. Please try again.</p>
 
   <!-- Divider -->
   <div class="divider"></div>
@@ -362,19 +363,19 @@
 
   </div>
 
-  <!-- Domain -->
-  <p class="domain-line">debot.com &nbsp;·&nbsp; Automation that adapts to your world.</p>
 
 </div>
 
-<p class="footer">© 2025 debots · All rights reserved</p>
+<p class="footer">© 2025 debots · All rights reserved &nbsp;·&nbsp; debot.com</p>
 
 <script>
-  function handleNotify() {
+  async function handleNotify() {
     var input = document.getElementById('emailInput');
     var msg   = document.getElementById('successMsg');
+    var errMsg = document.getElementById('errorMsg');
     var hint  = document.getElementById('formHint');
     var wrap  = document.querySelector('.email-wrap');
+    var btn   = document.querySelector('.btn-notify');
 
     var val = input.value.trim();
     if (!val || !val.includes('@') || !val.includes('.')) {
@@ -382,9 +383,33 @@
       setTimeout(function(){ input.classList.remove('error'); }, 1600);
       return;
     }
-    wrap.style.display  = 'none';
-    hint.style.display  = 'none';
-    msg.style.display   = 'block';
+
+    btn.textContent = 'Sending...';
+    btn.disabled = true;
+
+    try {
+      var response = await fetch('https://formspree.io/f/xzdqzqag', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ email: val, message: 'New signup from debot.com coming soon page.' })
+      });
+
+      if (response.ok) {
+        wrap.style.display  = 'none';
+        hint.style.display  = 'none';
+        msg.style.display   = 'block';
+      } else {
+        btn.textContent = 'Notify Me';
+        btn.disabled = false;
+        errMsg.style.display = 'block';
+        setTimeout(function(){ errMsg.style.display = 'none'; }, 4000);
+      }
+    } catch(e) {
+      btn.textContent = 'Notify Me';
+      btn.disabled = false;
+      errMsg.style.display = 'block';
+      setTimeout(function(){ errMsg.style.display = 'none'; }, 4000);
+    }
   }
 </script>
 
